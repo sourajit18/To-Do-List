@@ -8,12 +8,15 @@ const filePath = path.join(__dirname, "Todo.json");
 const { nanoid } = require("nanoid");
 
 let todolist = []
+// Load persisted data from file into memory on server start
 try {
     const data = fs.readFileSync(filePath, "utf-8");
     todolist = JSON.parse(data);
 } catch {
     todolist = []
 }
+
+// Returns a simplified view of all todos (hides internal IDs)
 app.get("/todos", ((req, res) => {
     const ToDoList = todolist.map((elem) => ({
         title: elem.title,
@@ -24,7 +27,7 @@ app.get("/todos", ((req, res) => {
     })
 }))
 
-
+// Utility function to locate todo index by ID
 function findItem(searchID) {
     let item = -1;
     for (let i = 0; i < todolist.length; i++) {
@@ -33,6 +36,7 @@ function findItem(searchID) {
     return item
 }
 
+// Fetch a single todo by its ID
 app.get("/todos/:id", ((req, res) => {
     const searchID = req.params.id;
     const item=findItem(searchID)
@@ -48,6 +52,7 @@ app.get("/todos/:id", ((req, res) => {
     })
 }))
 
+// Create a new todo and persist it to storage
 app.post("/todos", ((req, res) => {
     const itemTitle = req.body.title;
     const itemDescription = req.body.description;
@@ -64,7 +69,7 @@ app.post("/todos", ((req, res) => {
 fs.writeFileSync(filePath, JSON.stringify(todolist));
 })
 )
-
+// Update an existing todo by ID
 app.put("/todos/:id", ((req, res) => {
     const searchID = req.params.id;
     const updateTitle = req.body.title;
@@ -86,7 +91,7 @@ app.put("/todos/:id", ((req, res) => {
     }
 })
 )
-
+// Delete a todo by ID and persist updated list
 app.delete("/todos/:id", ((req, res) => {
     const searchID = req.params.id
     const item=findItem(searchID)
